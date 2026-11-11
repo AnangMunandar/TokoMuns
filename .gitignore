@@ -1,0 +1,12 @@
+﻿# Database lokal
+*.db
+*.db-shm
+*.db-wal
+
+# File rahasia
+.env
+.env.*
+
+# File hasil build
+*.exe
+*.log

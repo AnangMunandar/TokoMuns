@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TokoKita - Premium Online Store</title>
+    <title>TokoMuns - Premium Online Store</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -241,13 +240,14 @@
             height: 260px;
             position: relative;
             overflow: hidden;
-            background: #eef0f5;
+            background: linear-gradient(135deg, #eef0f5, #dfe4ec);
         }
 
         .gambar-produk img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
             transition: .5s;
         }
 
@@ -283,17 +283,24 @@
             font-size: 18px;
         }
 
-        .rating {
-            color: #f5a623;
+        .deskripsi-produk {
             font-size: 13px;
-            margin-bottom: 14px;
+            color: var(--muted);
+            margin: 8px 0;
+            line-height: 1.5;
         }
 
         .harga {
             color: var(--orange);
             font-size: 20px;
             font-weight: 800;
-            margin-bottom: 17px;
+            margin: 12px 0;
+        }
+
+        .stok-produk {
+            font-size: 12px;
+            margin-bottom: 12px;
+            color: var(--muted);
         }
 
         .btn-beli {
@@ -309,6 +316,11 @@
 
         .btn-beli:hover {
             background: var(--orange);
+        }
+
+        .btn-beli:disabled {
+            opacity: .55;
+            cursor: not-allowed;
         }
 
         /* CART AND CHECKOUT */
@@ -466,6 +478,8 @@
             line-height: 1.8;
         }
 
+        /* RESPONSIVE */
+
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
@@ -532,7 +546,7 @@
 
 <header>
     <nav>
-        <a href="#" class="logo">Toko<span>Kita.</span></a>
+        <a href="#" class="logo">Toko<span>Muns.</span></a>
 
         <div class="nav-links">
             <a href="#">Beranda</a>
@@ -551,7 +565,7 @@
     <div class="hero-content">
         <span class="hero-label">✨ KOLEKSI PILIHAN 2026</span>
 
-        <h2>Temukan Gaya Terbaikmu Bersama TokoKita.</h2>
+        <h2>Temukan Gaya Terbaikmu Bersama TokoMuns.</h2>
 
         <p>
             Belanja produk favoritmu dengan kualitas terbaik,
@@ -601,75 +615,12 @@
         </div>
     </div>
 
-    <div class="daftar-produk">
+    <!-- Produk ditampilkan dari database Golang -->
 
-        <div class="kartu">
-            <div class="gambar-produk">
-                <img
-                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700"
-                    alt="Kaos Casual"
-                    loading="lazy">
-                <span class="label-produk">BEST SELLER</span>
-            </div>
-
-            <div class="detail-produk">
-                <span class="kategori">Fashion Pria</span>
-                <h3>Kaos Casual</h3>
-                <div class="rating">★★★★★ <span style="color:#788196">4.9</span></div>
-                <p class="harga">Rp75.000</p>
-
-                <button class="btn-beli"
-                    onclick="tambahKeranjang('Kaos Casual', 75000)">
-                    + Tambah ke Keranjang
-                </button>
-            </div>
-        </div>
-
-        <div class="kartu">
-            <div class="gambar-produk">
-                <img
-                    src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700"
-                    alt="Sepatu Sneakers"
-                    loading="lazy">
-                <span class="label-produk">POPULER</span>
-            </div>
-
-            <div class="detail-produk">
-                <span class="kategori">Fashion & Sneakers</span>
-                <h3>Sepatu Sneakers</h3>
-                <div class="rating">★★★★★ <span style="color:#788196">4.8</span></div>
-                <p class="harga">Rp250.000</p>
-
-                <button class="btn-beli"
-                    onclick="tambahKeranjang('Sepatu Sneakers', 250000)">
-                    + Tambah ke Keranjang
-                </button>
-            </div>
-        </div>
-
-        <div class="kartu">
-            <div class="gambar-produk">
-                <img
-                    src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700"
-                    alt="Tas Backpack"
-                    loading="lazy">
-                <span class="label-produk">FAVORIT</span>
-            </div>
-
-            <div class="detail-produk">
-                <span class="kategori">Aksesoris</span>
-                <h3>Tas Backpack</h3>
-                <div class="rating">★★★★★ <span style="color:#788196">4.9</span></div>
-                <p class="harga">Rp150.000</p>
-
-                <button class="btn-beli"
-                    onclick="tambahKeranjang('Tas Backpack', 150000)">
-                    + Tambah ke Keranjang
-                </button>
-            </div>
-        </div>
-
+    <div class="daftar-produk" id="daftar-produk">
+        <p class="kosong">Memuat produk...</p>
     </div>
+
 </section>
 
 <!-- CART AND CHECKOUT -->
@@ -726,32 +677,211 @@
 </section>
 
 <footer>
-    <h2>Toko<span style="color:#ff7043">Kita.</span></h2>
+    <h2>Toko<span style="color:#ff7043">Muns.</span></h2>
     <p>Belanja lebih mudah, nyaman, dan menyenangkan.</p>
-    <p>© 2026 TokoKita. Semua Hak Dilindungi.</p>
+    <p>© 2026 TokoMuns. Semua Hak Dilindungi.</p>
 </footer>
 
 <script>
 
     let keranjang = [];
+    let daftarProdukTersedia = [];
+
+    // FORMAT RUPIAH
 
     const formatRupiah = (angka) => {
-        return "Rp" + angka.toLocaleString("id-ID");
+        return "Rp" + Number(angka || 0).toLocaleString("id-ID");
     };
 
-    // TAMBAH PRODUK
+    // GAMBAR CADANGAN BERDASARKAN NAMA PRODUK
 
-    function tambahKeranjang(nama, harga) {
+    function gambarCadangan(namaProduk) {
 
-        const produk = keranjang.find(item => item.nama === nama);
+        const nama = (namaProduk || "").toLowerCase();
 
-        if (produk) {
-            produk.qty++;
+        if (nama.includes("jam") || nama.includes("watch")) {
+            return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800";
+        }
+
+        if (nama.includes("celana") || nama.includes("jeans")) {
+            return "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800";
+        }
+
+        if (nama.includes("jaket") || nama.includes("hoodie")) {
+            return "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800";
+        }
+
+        if (nama.includes("kaos") || nama.includes("baju") || nama.includes("shirt")) {
+            return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800";
+        }
+
+        if (nama.includes("sepatu") || nama.includes("sneaker")) {
+            return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800";
+        }
+
+        if (nama.includes("tas") || nama.includes("backpack")) {
+            return "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800";
+        }
+
+        return "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800";
+    }
+
+    // MENGAMBIL PRODUK DARI DATABASE GOLANG
+
+    async function muatProduk() {
+
+        const wadah = document.getElementById("daftar-produk");
+
+        wadah.innerHTML = '<p class="kosong">Memuat produk...</p>';
+
+        try {
+
+            const response = await fetch("/api/products");
+
+            if (!response.ok) {
+                throw new Error("Gagal mengambil produk dari server (" + response.status + ")");
+            }
+
+            const produk = await response.json();
+
+            daftarProdukTersedia = Array.isArray(produk) ? produk : [];
+
+            wadah.innerHTML = "";
+
+            if (daftarProdukTersedia.length === 0) {
+                wadah.innerHTML =
+                    '<p class="kosong">Belum ada produk tersedia.</p>';
+                return;
+            }
+
+            daftarProdukTersedia.forEach(item => {
+
+                const kartu = document.createElement("div");
+                kartu.className = "kartu";
+
+                const gambar = document.createElement("div");
+                gambar.className = "gambar-produk";
+
+                const img = document.createElement("img");
+
+                img.src = item.gambar && item.gambar.trim() !== ""
+                    ? item.gambar
+                    : gambarCadangan(item.nama);
+
+                img.alt = item.nama || "Foto produk";
+                img.loading = "lazy";
+
+                img.onerror = function () {
+                    this.onerror = null;
+                    this.src = "https://placehold.co/800x600/e9edf3/788196?text=Foto+Produk";
+                };
+
+                const label = document.createElement("span");
+                label.className = "label-produk";
+                label.textContent = "PRODUK";
+
+                gambar.append(img, label);
+
+                const detail = document.createElement("div");
+                detail.className = "detail-produk";
+
+                const kategori = document.createElement("span");
+                kategori.className = "kategori";
+                kategori.textContent = "Koleksi TokoMuns";
+
+                const nama = document.createElement("h3");
+                nama.textContent = item.nama;
+
+                const deskripsi = document.createElement("p");
+                deskripsi.className = "deskripsi-produk";
+                deskripsi.textContent = item.deskripsi || "Produk pilihan";
+
+                const harga = document.createElement("p");
+                harga.className = "harga";
+                harga.textContent = formatRupiah(item.harga);
+
+                const stok = document.createElement("p");
+                stok.className = "stok-produk";
+                stok.textContent = "Stok: " + item.stok;
+
+                const tombol = document.createElement("button");
+                tombol.className = "btn-beli";
+                tombol.type = "button";
+
+                if (Number(item.stok) <= 0) {
+
+                    tombol.textContent = "Stok Habis";
+                    tombol.disabled = true;
+
+                } else {
+
+                    tombol.textContent = "+ Tambah ke Keranjang";
+
+                    tombol.addEventListener("click", () => {
+                        tambahKeranjang(item);
+                    });
+                }
+
+                detail.append(
+                    kategori,
+                    nama,
+                    deskripsi,
+                    harga,
+                    stok,
+                    tombol
+                );
+
+                kartu.append(gambar, detail);
+
+                wadah.appendChild(kartu);
+            });
+
+        } catch (error) {
+
+            wadah.innerHTML =
+                '<p class="kosong">Gagal memuat produk. Pastikan server Go sedang berjalan, lalu muat ulang halaman.</p>';
+
+            console.error("Kesalahan produk:", error);
+        }
+    }
+
+    // TAMBAH PRODUK KE KERANJANG
+
+    function tambahKeranjang(dataProduk) {
+
+        const produkTersedia = daftarProdukTersedia.find(
+            p => p.nama === dataProduk.nama
+        );
+
+        if (!produkTersedia) {
+            alert("Produk tidak ditemukan. Silakan muat ulang halaman.");
+            return;
+        }
+
+        const produkDiKeranjang = keranjang.find(
+            item => item.nama === dataProduk.nama
+        );
+
+        const jumlahSekarang = produkDiKeranjang
+            ? produkDiKeranjang.qty
+            : 0;
+
+        if (jumlahSekarang >= Number(produkTersedia.stok)) {
+            alert("Jumlah produk sudah mencapai batas stok yang tersedia.");
+            return;
+        }
+
+        if (produkDiKeranjang) {
+
+            produkDiKeranjang.qty++;
+
         } else {
+
             keranjang.push({
-                nama: nama,
-                harga: harga,
-                qty: 1
+                nama: dataProduk.nama,
+                harga: Number(dataProduk.harga),
+                qty: 1,
+                stok: Number(dataProduk.stok)
             });
         }
 
@@ -762,9 +892,20 @@
 
     function ubahJumlah(index, perubahan) {
 
-        keranjang[index].qty += perubahan;
+        const item = keranjang[index];
 
-        if (keranjang[index].qty <= 0) {
+        if (!item) return;
+
+        const jumlahBaru = item.qty + perubahan;
+
+        if (jumlahBaru > item.stok) {
+            alert("Stok yang tersedia hanya " + item.stok + ".");
+            return;
+        }
+
+        item.qty = jumlahBaru;
+
+        if (item.qty <= 0) {
             keranjang.splice(index, 1);
         }
 
@@ -774,7 +915,9 @@
     // HAPUS PRODUK
 
     function hapusKeranjang(index) {
+
         keranjang.splice(index, 1);
+
         tampilkanKeranjang();
     }
 
@@ -792,6 +935,7 @@
         let jumlahProduk = 0;
 
         if (keranjang.length === 0) {
+
             daftar.innerHTML =
                 '<p class="kosong">Keranjang masih kosong. Yuk, pilih produk favoritmu!</p>';
         }
@@ -840,6 +984,7 @@
             hapus.onclick = () => hapusKeranjang(index);
 
             kontrol.append(kurang, qty, tambah, hapus);
+
             baris.append(informasi, kontrol);
 
             daftar.appendChild(baris);
@@ -874,7 +1019,9 @@
             const daftarItem = [];
 
             keranjang.forEach(item => {
+
                 for (let i = 0; i < item.qty; i++) {
+
                     daftarItem.push({
                         nama: item.nama
                     });
@@ -929,11 +1076,16 @@
                     formatRupiah(hasilData.total);
 
                 sukses.append(judul, nomor, total);
+
                 hasil.appendChild(sukses);
 
                 keranjang = [];
+
                 tampilkanKeranjang();
+
                 this.reset();
+
+                await muatProduk();
 
             } catch (error) {
 
@@ -944,12 +1096,14 @@
 
                 tombol.disabled = false;
                 tombol.textContent = "Buat Pesanan Sekarang →";
-
             }
 
         });
 
+    // JALANKAN SAAT HALAMAN DIBUKA
+
     tampilkanKeranjang();
+    muatProduk();
 
 </script>
 

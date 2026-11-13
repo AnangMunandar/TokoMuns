@@ -323,10 +323,11 @@ footer {
     <p class="menu-title">MENU UTAMA</p>
 
     <div class="menu">
-        <a href="#dashboard" class="active">📊 Dashboard</a>
-        <a href="#pesanan">📦 Data Pesanan</a>
-        <a href="/">🛍️ Lihat Toko</a>
-    </div>
+    <a href="#dashboard" class="active">📊 Dashboard</a>
+    <a href="#produk">🛒 Kelola Produk</a>
+    <a href="#pesanan">📦 Data Pesanan</a>
+    <a href="/">🛍️ Lihat Toko</a>
+</div>
 </aside>
 
 <main class="main" id="dashboard">
@@ -361,6 +362,196 @@ footer {
         </div>
 
     </section>
+
+<script>
+    // Mengambil daftar produk
+async function ambilProduk() {
+    const tabel = document.getElementById("tabel-produk");
+
+    try {
+        const response = await fetch("/api/products");
+
+        if (!response.ok) {
+            throw new Error("Gagal mengambil produk");
+        }
+
+        const produk = await response.json();
+
+        tabel.innerHTML = "";
+
+        if (!produk || produk.length === 0) {
+            tabel.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty">
+                        Belum ada produk.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        produk.forEach(item => {
+            const baris = document.createElement("tr");
+
+            const nama = document.createElement("td");
+            nama.textContent = item.nama;
+
+            const harga = document.createElement("td");
+            harga.textContent = rupiah(item.harga);
+
+            const stok = document.createElement("td");
+            stok.textContent = item.stok;
+
+            const deskripsi = document.createElement("td");
+            deskripsi.textContent = item.deskripsi;
+
+            baris.append(nama, harga, stok, deskripsi);
+            tabel.appendChild(baris);
+        });
+
+    } catch (error) {
+        tabel.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty">
+                    ${error.message}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Menambahkan produk baru
+document.getElementById("form-produk")
+    .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const pesan = document.getElementById("pesan-produk");
+        const tombol = document.getElementById("tombol-simpan");
+
+        const data = {
+            nama: document.getElementById("nama-produk").value,
+            harga: Number(document.getElementById("harga-produk").value),
+            stok: Number(document.getElementById("stok-produk").value),
+            gambar: document.getElementById("gambar-produk").value,
+            deskripsi: document.getElementById("deskripsi-produk").value
+        };
+
+        tombol.disabled = true;
+        tombol.textContent = "Menyimpan...";
+
+        try {
+            const response = await fetch("/api/admin/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const hasil = await response.json();
+
+            if (!response.ok) {
+                throw new Error(hasil.pesan || "Gagal menambahkan produk");
+            }
+
+            pesan.style.color = "green";
+            pesan.textContent = "Produk berhasil ditambahkan!";
+
+            document.getElementById("form-produk").reset();
+
+            await ambilProduk();
+
+        } catch (error) {
+            pesan.style.color = "red";
+            pesan.textContent = error.message;
+        }
+
+        tombol.disabled = false;
+        tombol.textContent = "+ Tambahkan Produk";
+    });
+
+ambilProduk();
+</script>
+
+<!-- KELOLA PRODUK -->
+<section class="panel" id="produk" style="margin-bottom:30px;">
+
+    <div class="panel-header">
+        <div>
+            <h2>Kelola Produk</h2>
+            <p style="color:#8290a5;font-size:12px;margin-top:5px">
+                Tambahkan produk baru ke toko TokoMuns
+            </p>
+        </div>
+    </div>
+
+    <form id="form-produk" style="display:grid;gap:15px;margin-top:20px;">
+
+        <div>
+            <label>Nama Produk</label>
+            <input type="text" id="nama-produk"
+                placeholder="Contoh: Jam Tangan" required>
+        </div>
+
+        <div>
+            <label>Harga Produk</label>
+            <input type="number" id="harga-produk"
+                placeholder="Contoh: 125000" min="1" required>
+        </div>
+
+        <div>
+            <label>Stok Produk</label>
+            <input type="number" id="stok-produk"
+                placeholder="Contoh: 10" min="0" required>
+        </div>
+
+        <div>
+            <label>URL Gambar Produk</label>
+            <input type="url" id="gambar-produk"
+                placeholder="https://alamat-gambar.com/gambar.jpg">
+        </div>
+
+        <div>
+            <label>Deskripsi Produk</label>
+            <textarea id="deskripsi-produk"
+                placeholder="Masukkan deskripsi produk"
+                rows="3"></textarea>
+        </div>
+
+        <div id="pesan-produk"></div>
+
+        <button type="submit" id="tombol-simpan">
+            + Tambahkan Produk
+        </button>
+
+    </form>
+
+    <div style="margin-top:30px">
+        <h3>Daftar Produk</h3>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Produk</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Deskripsi</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tabel-produk">
+                    <tr>
+                        <td colspan="4">Memuat produk...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+<!-- AKHIR KELOLA PRODUK -->
 
     <section class="panel" id="pesanan">
 

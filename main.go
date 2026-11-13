@@ -56,6 +56,14 @@ type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+type Produk struct {
+	ID        int    `json:"id"`
+	Nama      string `json:"nama"`
+	Harga     int    `json:"harga"`
+	Deskripsi string `json:"deskripsi"`
+	Gambar    string `json:"gambar"`
+	Stok      int    `json:"stok"`
+}
 
 // Mengirim respons JSON
 func kirimJSON(w http.ResponseWriter, status int, data any) {
@@ -91,7 +99,63 @@ func koneksiDatabase() error {
 	`
 
 	_, err = db.Exec(query)
-	return err
+	if err != nil {
+		return err
+	}
+
+	queryProduk := `
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama TEXT NOT NULL UNIQUE,
+    harga INTEGER NOT NULL,
+    deskripsi TEXT,
+    gambar TEXT,
+    stok INTEGER NOT NULL DEFAULT 0
+);
+`
+
+	_, err = db.Exec(queryProduk)
+	if err != nil {
+		return err
+	}
+
+	produkAwal := []Produk{
+		{
+			Nama:      "Kaos Casual",
+			Harga:     75000,
+			Deskripsi: "Kaos casual nyaman digunakan",
+			Gambar:    "",
+			Stok:      20,
+		},
+		{
+			Nama:      "Sepatu Sneakers",
+			Harga:     250000,
+			Deskripsi: "Sepatu sneakers untuk aktivitas sehari-hari",
+			Gambar:    "",
+			Stok:      10,
+		},
+		{
+			Nama:      "Tas Backpack",
+			Harga:     150000,
+			Deskripsi: "Tas backpack untuk kebutuhan sehari-hari",
+			Gambar:    "",
+			Stok:      15,
+		},
+	}
+
+	for _, p := range produkAwal {
+		_, err = db.Exec(`
+        INSERT OR IGNORE INTO products
+        (nama, harga, deskripsi, gambar, stok)
+        VALUES (?, ?, ?, ?, ?)
+    `, p.Nama, p.Harga, p.Deskripsi, p.Gambar, p.Stok)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Membuat token session acak
@@ -253,6 +317,8 @@ func adminLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 // API POST: Membuat pesanan
+
+// API POST: Membuat pesanan
 func buatPesanan(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		kirimJSON(w, http.StatusMethodNotAllowed, map[string]string{
@@ -331,12 +397,13 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 
 	waktu := time.Now().Format(time.RFC3339)
 
+	// Simpan pesanan baru dengan order_code NULL.
+	// NULL diperbolehkan berulang pada kolom UNIQUE SQLite.
 	result, err := tx.Exec(`
 		INSERT INTO orders
 		(order_code, nama, telepon, alamat, items_json, total, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		VALUES (NULL, ?, ?, ?, ?, ?, ?)
 	`,
-		"",
 		permintaan.Nama,
 		permintaan.Telepon,
 		permintaan.Alamat,
@@ -346,6 +413,7 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
+		log.Println("Gagal menyimpan pesanan:", err)
 		kirimJSON(w, http.StatusInternalServerError, map[string]string{
 			"pesan": "Gagal menyimpan pesanan",
 		})
@@ -360,6 +428,7 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Buat kode pesanan unik berdasarkan ID database.
 	kodePesanan := fmt.Sprintf("TK%04d", id)
 
 	_, err = tx.Exec(
@@ -369,6 +438,7 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
+		log.Println("Gagal memperbarui nomor pesanan:", err)
 		kirimJSON(w, http.StatusInternalServerError, map[string]string{
 			"pesan": "Gagal memperbarui nomor pesanan",
 		})
@@ -393,6 +463,7 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	kirimJSON(w, http.StatusCreated, pesanan)
+
 }
 
 // API GET: Mengambil seluruh riwayat pesanan
@@ -463,6 +534,109 @@ func daftarPesanan(w http.ResponseWriter, r *http.Request) {
 	kirimJSON(w, http.StatusOK, daftar)
 }
 
+// API GET: Mengambil seluruh produk
+func daftarProduk(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		kirimJSON(w, http.StatusMethodNotAllowed, map[string]string{
+			"pesan": "Metode tidak diizinkan",
+		})
+		return
+	}
+
+	rows, err := db.Query(`
+		SELECT id, nama, harga, deskripsi, gambar, stok
+		FROM products
+		ORDER BY id DESC
+	`)
+
+	if err != nil {
+		kirimJSON(w, http.StatusInternalServerError, map[string]string{
+			"pesan": "Gagal mengambil produk",
+		})
+		return
+	}
+	defer rows.Close()
+
+	produk := []*Produk{}
+
+	for rows.Next() {
+		var p Produk
+
+		err := rows.Scan(
+			&p.ID,
+			&p.Nama,
+			&p.Harga,
+			&p.Deskripsi,
+			&p.Gambar,
+			&p.Stok,
+		)
+
+		if err != nil {
+			kirimJSON(w, http.StatusInternalServerError, map[string]string{
+				"pesan": "Gagal membaca produk",
+			})
+			return
+		}
+
+		produk = append(produk, &p)
+	}
+
+	if err := rows.Err(); err != nil {
+		kirimJSON(w, http.StatusInternalServerError, map[string]string{
+			"pesan": "Kesalahan database",
+		})
+		return
+	}
+
+	kirimJSON(w, http.StatusOK, produk)
+}
+
+// API POST: Menambahkan produk baru
+func tambahProduk(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		kirimJSON(w, http.StatusMethodNotAllowed, map[string]string{
+			"pesan": "Metode tidak diizinkan",
+		})
+		return
+	}
+
+	var p Produk
+
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		kirimJSON(w, http.StatusBadRequest, map[string]string{
+			"pesan": "Format data tidak valid",
+		})
+		return
+	}
+
+	p.Nama = strings.TrimSpace(p.Nama)
+	p.Deskripsi = strings.TrimSpace(p.Deskripsi)
+	p.Gambar = strings.TrimSpace(p.Gambar)
+
+	if p.Nama == "" || p.Harga <= 0 || p.Stok < 0 {
+		kirimJSON(w, http.StatusBadRequest, map[string]string{
+			"pesan": "Nama, harga, atau stok tidak valid",
+		})
+		return
+	}
+
+	_, err := db.Exec(`
+		INSERT INTO products (nama, harga, deskripsi, gambar, stok)
+		VALUES (?, ?, ?, ?, ?)
+	`, p.Nama, p.Harga, p.Deskripsi, p.Gambar, p.Stok)
+
+	if err != nil {
+		kirimJSON(w, http.StatusBadRequest, map[string]string{
+			"pesan": "Gagal menyimpan produk. Pastikan nama produk belum digunakan.",
+		})
+		return
+	}
+
+	kirimJSON(w, http.StatusCreated, map[string]string{
+		"pesan": "Produk berhasil ditambahkan",
+	})
+}
+
 // Program utama
 func main() {
 	err := koneksiDatabase()
@@ -473,7 +647,12 @@ func main() {
 
 	// API pemesanan untuk pelanggan
 	http.HandleFunc("/api/orders", buatPesanan)
-
+	// API daftar produk
+	http.HandleFunc("/api/products", daftarProduk)
+	// API tambah produk khusus admin
+	http.Handle("/api/admin/products",
+		wajibLogin(http.HandlerFunc(tambahProduk)),
+	)
 	// API login dan logout admin
 	http.HandleFunc("/api/admin/login", adminLogin)
 	http.HandleFunc("/api/admin/logout", adminLogout)

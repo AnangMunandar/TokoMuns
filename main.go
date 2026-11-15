@@ -76,7 +76,12 @@ func kirimJSON(w http.ResponseWriter, status int, data any) {
 func koneksiDatabase() error {
 	var err error
 
-	db, err = sql.Open("sqlite", "toko.db")
+	lokasiDB := os.Getenv("DATABASE_PATH")
+	if lokasiDB == "" {
+		lokasiDB = "toko.db"
+	}
+
+	db, err = sql.Open("sqlite", lokasiDB)
 	if err != nil {
 		return err
 	}
@@ -140,6 +145,34 @@ CREATE TABLE IF NOT EXISTS products (
 			Deskripsi: "Tas backpack untuk kebutuhan sehari-hari",
 			Gambar:    "",
 			Stok:      15,
+		},
+		{
+			Nama:      "Topi Baseball",
+			Harga:     50000,
+			Deskripsi: "Topi baseball adjustable",
+			Gambar:    "",
+			Stok:      25,
+		},
+		{
+			Nama:      "Jaket Hoodie",
+			Harga:     180000,
+			Deskripsi: "Hoodie hangat dan nyaman",
+			Gambar:    "",
+			Stok:      12,
+		},
+		{
+			Nama:      "Celana Jeans",
+			Harga:     200000,
+			Deskripsi: "Celana jeans slim fit",
+			Gambar:    "",
+			Stok:      15,
+		},
+		{
+			Nama:      "Jam Tangan",
+			Harga:     300000,
+			Deskripsi: "Jam tangan casual",
+			Gambar:    "",
+			Stok:      8,
 		},
 	}
 
@@ -350,18 +383,17 @@ func buatPesanan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	daftarHarga := map[string]int{
-		"Kaos Casual":     75000,
-		"Sepatu Sneakers": 250000,
-		"Tas Backpack":    150000,
-	}
-
 	var itemPesanan []ItemPesanan
 	total := 0
 
 	for _, item := range permintaan.Item {
 		namaProduk := strings.TrimSpace(item.Nama)
-		harga, ditemukan := daftarHarga[namaProduk]
+		var harga int
+		errHarga := db.QueryRow(
+			"SELECT harga FROM products WHERE nama = ?",
+			namaProduk,
+		).Scan(&harga)
+		ditemukan := errHarga == nil
 
 		if !ditemukan {
 			kirimJSON(w, http.StatusBadRequest, map[string]string{
